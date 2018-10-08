@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     List<String> foundedDevicesList;
     List<String> deviceMACadresses;
     List<BluetoothDevice> bluetoothDevices;
+    List<BluetoothDevice> newDeviceObjects;
     BluetoothDevice mmDevice;
     String selectedAction;
     List<String> supportedActions;
@@ -74,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         newDevice = new ArrayList<String>();
         devNameAdapter = new ArrayAdapter<String>(MainActivity.this,android.R.layout.simple_list_item_1,newDevice);
         spDiscoveredDevicesMain.setAdapter(devNameAdapter);
-
+        newDeviceObjects = new ArrayList<BluetoothDevice>();
 
     }
 
@@ -209,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
     {
         askForBluetoothPermission();
         newDevice.clear();
+        newDeviceObjects.clear();
     }
 
     // Create a BroadcastReceiver for ACTION_FOUND.
@@ -225,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
 
                 String newBTdevice =newDiscoveredDevice.getName();
                 newDevice.add(newBTdevice);
+                newDeviceObjects.add(newDiscoveredDevice);
                 Toast.makeText(context, "Gerät " + newBTdevice +" gefunden", Toast.LENGTH_SHORT).show();
                 devNameAdapter.notifyDataSetChanged();
 
@@ -258,6 +261,19 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void onBtnConnectToNewDeviceClicked(View v)
+    {
+        int pos = spDiscoveredDevicesMain.getSelectedItemPosition();
+        try {
+            connectToDiscoveredBluetoothDevice(newDeviceObjects.get(pos));
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Verindung konnte nicht hergestellt werden", Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
+
     public void connectToDiscoveredBluetoothDevice(BluetoothDevice newDevice) throws IOException {
 
         UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //Standard SerialPortService ID
@@ -269,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
         //Optional
 
         Toast.makeText(getApplicationContext(), "Verbindung wurde hergestellt", Toast.LENGTH_SHORT).show();
-
+        checkForPairedDevices();
     }
 
 

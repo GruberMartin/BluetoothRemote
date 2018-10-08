@@ -66,6 +66,7 @@
             android:id="@+id/btnConnectToNewDeviceMain"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:onClick="onBtnConnectToNewDeviceClicked"
             android:text="Mit dem ausgewählten Gerät verbinden" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>
