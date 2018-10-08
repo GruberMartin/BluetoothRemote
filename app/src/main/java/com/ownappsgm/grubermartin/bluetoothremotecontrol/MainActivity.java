@@ -176,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void OnBtnSettingsClicked(View v)
     {
-
+        Intent goToPrefs = new Intent(this, MyPreferencesActivity.class);
+        startActivity(goToPrefs);
     }
 }
