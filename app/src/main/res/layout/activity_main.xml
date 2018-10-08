@@ -45,10 +45,27 @@
             android:text="Verbinden" />
 
         <Button
-            android:id="@+id/btnSettingsMain"
+            android:id="@+id/btnFindDevicesMain"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="OnBtnSettingsClicked"
-            android:text="Einstellungen" />
+            android:onClick="OnBtnFindDevicesClicked"
+            android:text="Suche nach Geräten" />
+
+        <TextView
+            android:id="@+id/tvDiscoveredDevicesMain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Unten werden alle gefundenen Geräte angezeigt" />
+
+        <Spinner
+            android:id="@+id/spDiscoveredDevicesMain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btnConnectToNewDeviceMain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mit dem ausgewählten Gerät verbinden" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

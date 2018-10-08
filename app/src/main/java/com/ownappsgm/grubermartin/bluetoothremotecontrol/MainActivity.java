@@ -1,10 +1,19 @@
 package com.ownappsgm.grubermartin.bluetoothremotecontrol;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -13,15 +22,22 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
-    Spinner spDeviceListMain, spActionSelectMain;
-    TextView tvSelectDeviceMain, tvChooseAnActionMain;
-    Button btnConnectMain, btnSettingsMain;
+    int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
+
+
+    Spinner spDeviceListMain, spActionSelectMain, spDiscoveredDevicesMain;
+    TextView tvSelectDeviceMain, tvChooseAnActionMain, tvDiscoveredDevicesMain;
+    Button btnConnectMain, btnFindDevicesMain, btnConnectToNewDeviceMain;
 
     List<String> foundedDevicesList;
     List<String> deviceMACadresses;
@@ -29,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     BluetoothDevice mmDevice;
     String selectedAction;
     List<String> supportedActions;
+    List <String> newDevice;
+    ArrayAdapter<String> devNameAdapter;
 
     int REQUEST_ENABLE_BT = 2; // erhält Result Code
 
@@ -38,13 +56,26 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         spDeviceListMain = (Spinner) findViewById(R.id.spDeviceListMain);
         spActionSelectMain = (Spinner) findViewById(R.id.spActionSelectMain);
+        spDiscoveredDevicesMain = (Spinner) findViewById(R.id.spDiscoveredDevicesMain);
         tvSelectDeviceMain = (TextView) findViewById(R.id.tvSelectDeviceMain);
         tvChooseAnActionMain = (TextView) findViewById(R.id.tvChooseAnActionMain);
+        tvDiscoveredDevicesMain = (TextView) findViewById(R.id.tvDiscoveredDevicesMain);
         btnConnectMain = (Button) findViewById(R.id.btnConnectMain);
-        btnSettingsMain = (Button) findViewById(R.id.btnSettingsMain);
+        btnFindDevicesMain = (Button) findViewById(R.id.btnFindDevicesMain);
+        btnConnectToNewDeviceMain = (Button) findViewById(R.id.btnConnectToNewDeviceMain);
         generateSupportedActionsList();
         btnConnectMain.setEnabled(false);
         checkForBluetooth();
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        registerReceiver(mReceiver,filter);
+        //filter.addAction(BluetoothDevice.ACTION_FOUND);
+        newDevice = new ArrayList<String>();
+        devNameAdapter = new ArrayAdapter<String>(MainActivity.this,android.R.layout.simple_list_item_1,newDevice);
+        spDiscoveredDevicesMain.setAdapter(devNameAdapter);
+
+
     }
 
     public void checkForPairedDevices()
@@ -174,9 +205,73 @@ public class MainActivity extends AppCompatActivity {
         changeToSelctedActionActivity();
     }
 
-    public void OnBtnSettingsClicked(View v)
+    public void OnBtnFindDevicesClicked(View v)
     {
-        Intent goToPrefs = new Intent(this, MyPreferencesActivity.class);
-        startActivity(goToPrefs);
+        askForBluetoothPermission();
+        newDevice.clear();
     }
+
+    // Create a BroadcastReceiver for ACTION_FOUND.
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver()
+    {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            String action = intent.getAction();
+            // When discovery finds a device
+            if (BluetoothDevice.ACTION_FOUND.equals(action))
+            {
+                BluetoothDevice newDiscoveredDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+                String newBTdevice =newDiscoveredDevice.getName();
+                newDevice.add(newBTdevice);
+                Toast.makeText(context, "Gerät " + newBTdevice +" gefunden", Toast.LENGTH_SHORT).show();
+                devNameAdapter.notifyDataSetChanged();
+
+
+            }
+            else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
+            {
+                Toast.makeText(context, "Suche beendet", Toast.LENGTH_SHORT).show();
+
+
+            }
+            else if(BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action))
+            {
+                Toast.makeText(context, "Beginne mit der Suche", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+    public void askForBluetoothPermission()
+    {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            // Permission is not granted
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+        }
+        else
+        {
+            BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+            btAdapter.startDiscovery();
+        }
+
+    }
+
+    public void connectToDiscoveredBluetoothDevice(BluetoothDevice newDevice) throws IOException {
+
+        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //Standard SerialPortService ID
+        BluetoothSocket mmSocket = newDevice.createRfcommSocketToServiceRecord(uuid);
+        mmSocket.connect();
+        OutputStream mmOutputStream = mmSocket.getOutputStream();
+        InputStream mmInputStream = mmSocket.getInputStream();
+
+        //Optional
+
+        Toast.makeText(getApplicationContext(), "Verbindung wurde hergestellt", Toast.LENGTH_SHORT).show();
+
+    }
+
+
+
 }
