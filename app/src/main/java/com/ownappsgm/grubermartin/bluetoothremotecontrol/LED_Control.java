@@ -44,6 +44,16 @@ public class LED_Control extends AppCompatActivity {
                 btnLedOffLedControl.setEnabled(false);
             }
         }
+        else
+        {
+            Toast.makeText(this, "Es wurde kein Gerät übergeben", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        resetConnection();
     }
 
     public void openBT() throws IOException {
@@ -81,5 +91,29 @@ public class LED_Control extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(this, "Senden fehlgeschlagen", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void resetConnection() {
+        if (mmInputStream != null) {
+            try {mmInputStream.close();} catch (Exception e) {
+                Toast.makeText(this, "Inputstream konnte nicht geschlossen werden", Toast.LENGTH_SHORT).show();
+            }
+            mmInputStream = null;
+        }
+
+        if (mmOutputStream != null) {
+            try {mmOutputStream.close();} catch (Exception e) {
+                Toast.makeText(this, "Outputstream konnte nicht geschlossen werden", Toast.LENGTH_SHORT).show();
+            }
+            mmOutputStream = null;
+        }
+
+        if (mmSocket != null) {
+            try {mmSocket.close();} catch (Exception e) {
+                Toast.makeText(this, "Socket konnte nicht geschlossen werden", Toast.LENGTH_SHORT).show();
+            }
+            mmSocket = null;
+        }
+
     }
 }
