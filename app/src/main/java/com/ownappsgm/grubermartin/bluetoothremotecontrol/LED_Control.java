@@ -2,7 +2,9 @@ package com.ownappsgm.grubermartin.bluetoothremotecontrol;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -39,9 +41,32 @@ public class LED_Control extends AppCompatActivity {
                 openBT();
             } catch (IOException e) {
                 e.printStackTrace();
-                Toast.makeText(this, "Kann keine Bluetoothverbindung herstellen", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Kann keine Bluetoothverbindung herstellen", Toast.LENGTH_SHORT).show();
                 btnLedOnLedControl.setEnabled(false);
                 btnLedOffLedControl.setEnabled(false);
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+                alertDialogBuilder.setMessage("Es konnte keine Verbindung aufgebaut werden, möchtest du es erneut versuche?");
+                alertDialogBuilder.setPositiveButton("Ja", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        try {
+                            Toast.makeText(LED_Control.this, "Erneuter Verbindungsversuch bitte warten!", Toast.LENGTH_LONG).show();
+                            openBT();
+                        } catch (IOException e1) {
+                            Toast.makeText(LED_Control.this, "Das hat leider immernoch nicht funktioniert", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(LED_Control.this, MainActivity.class));
+                        }
+                    }
+                });
+                alertDialogBuilder.setNegativeButton("Nein", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivity(new Intent(LED_Control.this, MainActivity.class));
+                    }
+                });
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
             }
         }
         else

@@ -296,9 +296,7 @@ public class MainActivity extends AppCompatActivity {
         if(!pairedDevicesMap.containsKey(newDevicesObject.get(pos).getName())) {
             mmDevice = newDevicesObject.get(pos);
             changeToSelctedActionActivity();
-            pairedDevicesMap.put(newDevicesObject.get(pos).getName().toString(), newDevicesObject.get(pos));
-            pairedDeviceNamesList.add(newDevicesObject.get(pos).getName());
-            fillListWithPairedDevices();
+
         }
         else
         {
