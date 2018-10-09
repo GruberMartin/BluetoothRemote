@@ -13,7 +13,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -26,38 +25,43 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
-    int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
 
+
+    // region Deklaration von Variablen
 
     Spinner spDeviceListMain, spActionSelectMain, spDiscoveredDevicesMain;
     TextView tvPairedDeviceHintMain, tvSelectDeviceMain, tvChooseAnActionMain, tvSearchForDevicesHintMain, tvDiscoveredDevicesMain;
     Button btnConnectMain, btnFindDevicesMain, btnConnectToNewDeviceMain;
 
-    List<String> foundedDevicesList;
-    List<String> deviceMACadresses;
-    List<BluetoothDevice> bluetoothDevices;
-    List<BluetoothDevice> newDeviceObjects;
+    Map<String,BluetoothDevice> pairedDevicesMap;
+    List<String> pairedDeviceNamesList;
+    List<BluetoothDevice> newDevicesObject;
     BluetoothDevice mmDevice;
     String selectedAction;
     List<String> supportedActions;
-    List <String> newDevice;
+    List <String> newDevicesName;
     ArrayAdapter<String> devNameAdapter;
 
+    int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
     int REQUEST_ENABLE_BT = 2; // erhält Result Code
     OutputStream mmOutputStream = null;
     InputStream mmInputStream = null;
     BluetoothSocket mmSocket = null;
+    // endregion
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // region Initialisierung aller Widgets
         spDeviceListMain = (Spinner) findViewById(R.id.spDeviceListMain);
         spActionSelectMain = (Spinner) findViewById(R.id.spActionSelectMain);
         spDiscoveredDevicesMain = (Spinner) findViewById(R.id.spDiscoveredDevicesMain);
@@ -69,63 +73,76 @@ public class MainActivity extends AppCompatActivity {
         btnConnectMain = (Button) findViewById(R.id.btnConnectMain);
         btnFindDevicesMain = (Button) findViewById(R.id.btnFindDevicesMain);
         btnConnectToNewDeviceMain = (Button) findViewById(R.id.btnConnectToNewDeviceMain);
-        generateSupportedActionsList();
-        btnConnectMain.setEnabled(false);
+        // endregion
+                                                        btnConnectMain.setEnabled(false);
         checkForBluetooth();
+
+        //region Registrierung eines BroadcastReceivers um neue Geräte zu finden
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         registerReceiver(mReceiver,filter);
-        //filter.addAction(BluetoothDevice.ACTION_FOUND);
-        newDevice = new ArrayList<String>();
-        devNameAdapter = new ArrayAdapter<String>(MainActivity.this,android.R.layout.simple_list_item_1,newDevice);
-        spDiscoveredDevicesMain.setAdapter(devNameAdapter);
-        newDeviceObjects = new ArrayList<BluetoothDevice>();
-        btnConnectToNewDeviceMain.setEnabled(false);
+        //endregion
+        generateListWithNewBluetoothDeviceNames();
+        generateListWithNewBluetoothDeviceObjects();
+        generateListWithActions();
+        generateListWithPairedDevices();
+        fillListWithPairedDevices();
+
+                                                        btnConnectToNewDeviceMain.setEnabled(false);
 
     }
 
-    public void checkForPairedDevices()
+    public void generateListWithNewBluetoothDeviceNames()
+    {
+        newDevicesName = new ArrayList<String>();
+        devNameAdapter = new ArrayAdapter<String>(MainActivity.this,android.R.layout.simple_list_item_1, newDevicesName);
+        spDiscoveredDevicesMain.setAdapter(devNameAdapter);
+    }
+
+    public void generateListWithNewBluetoothDeviceObjects()
+    {
+        newDevicesObject = new ArrayList<BluetoothDevice>();
+    }
+
+    public void generateListWithPairedDevices()
     {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-
+        pairedDevicesMap = new HashMap<>();
         if (pairedDevices.size() > 0) {
             // There are paired devices. Get the name and address of each paired device.
-            foundedDevicesList = new ArrayList<String>();
-            deviceMACadresses = new ArrayList<String>();
-            bluetoothDevices = new ArrayList<BluetoothDevice>();
-            for (BluetoothDevice device : pairedDevices) {
-                String deviceName = device.getName();
-                String deviceHardwareAddress = device.getAddress(); // MAC address
-                foundedDevicesList.add(deviceName);
-                deviceMACadresses.add(deviceHardwareAddress);
-                bluetoothDevices.add(device);
-
+            pairedDeviceNamesList = new ArrayList<String>();
+            for (BluetoothDevice device : pairedDevices)
+            {
+                pairedDevicesMap.put(device.getName(),device);
+                pairedDeviceNamesList.add(device.getName());
             }
-            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,foundedDevicesList);
-            spDeviceListMain.setAdapter(arrayAdapter);
-            spDeviceListMain.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                    String chlickedItemName = foundedDevicesList.get(position);
-                    String selectedDevicesMacAddress = deviceMACadresses.get(position);
-                    mmDevice = bluetoothDevices.get(position);
-                    btnConnectMain.setEnabled(true);
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
         }
         else
         {
             // Es wurden keine gekoppelten Geräte gefunden
-            foundedDevicesList.add("Es wurden keine Geräte gefunden");
+            Toast.makeText(this, "Es wurden keine verbundenen Geräte gefunden", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void fillListWithPairedDevices()
+    {
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, pairedDeviceNamesList);
+        spDeviceListMain.setAdapter(arrayAdapter);
+        spDeviceListMain.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                mmDevice = pairedDevicesMap.get(pairedDeviceNamesList.get(position).toString());
+                btnConnectMain.setEnabled(true);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
     public void checkForBluetooth()
@@ -144,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
             else
             {
                 // Wenn Bluetooth eingeschaltet wurde, soll überprüft werden ob Geräte bereits gekoppelt sind
-                checkForPairedDevices();
+                generateListWithPairedDevices();
 
             }
 
@@ -161,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
             {
                 // Wenn Bluetooth eingeschaltet wurde, soll der ConnectButton nicht mehr ausgegraut bleiben und alle gekoppelten
                 // Geräte sollen aufgelistet werden
-                checkForPairedDevices();
+                generateListWithPairedDevices();
 
 
             }
@@ -189,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void generateSupportedActionsList()
+    public void generateListWithActions()
     {
         supportedActions = new ArrayList<String>();
         supportedActions.add("LED_Control");
@@ -216,11 +233,12 @@ public class MainActivity extends AppCompatActivity {
     public void OnBtnFindDevicesClicked(View v)
     {
         askForBluetoothPermission();
-        newDevice.clear();
-        newDeviceObjects.clear();
+        newDevicesName.clear();
+        newDevicesObject.clear();
         btnConnectToNewDeviceMain.setEnabled(false);
     }
 
+    //region Implementierung des Broadcast Receivers
     // Create a BroadcastReceiver for ACTION_FOUND.
     private final BroadcastReceiver mReceiver = new BroadcastReceiver()
     {
@@ -234,8 +252,8 @@ public class MainActivity extends AppCompatActivity {
                 BluetoothDevice newDiscoveredDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
                 String newBTdevice =newDiscoveredDevice.getName();
-                newDevice.add(newBTdevice);
-                newDeviceObjects.add(newDiscoveredDevice);
+                newDevicesName.add(newBTdevice);
+                newDevicesObject.add(newDiscoveredDevice);
                 Toast.makeText(context, "Gerät " + newBTdevice +" gefunden", Toast.LENGTH_SHORT).show();
                 devNameAdapter.notifyDataSetChanged();
                 btnConnectToNewDeviceMain.setEnabled(true);
@@ -254,6 +272,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+    // endregion
 
     public void askForBluetoothPermission()
     {
@@ -273,61 +292,26 @@ public class MainActivity extends AppCompatActivity {
     public void onBtnConnectToNewDeviceClicked(View v)
     {
 
-
-            btnConnectToNewDeviceMain.setEnabled(true);
-            int pos = spDiscoveredDevicesMain.getSelectedItemPosition();
-
-            try {
-                connectToDiscoveredBluetoothDevice(newDeviceObjects.get(pos));
-                bluetoothDevices.add(newDeviceObjects.get(pos));
-                checkForPairedDevices();
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Verindung konnte nicht hergestellt werden", Toast.LENGTH_SHORT).show();
-                resetConnection();
-            }
-
+        int pos = spDiscoveredDevicesMain.getSelectedItemPosition();
+        if(!pairedDevicesMap.containsKey(newDevicesObject.get(pos).getName())) {
+            mmDevice = newDevicesObject.get(pos);
+            changeToSelctedActionActivity();
+            pairedDevicesMap.put(newDevicesObject.get(pos).getName().toString(), newDevicesObject.get(pos));
+            pairedDeviceNamesList.add(newDevicesObject.get(pos).getName());
+            fillListWithPairedDevices();
+        }
+        else
+        {
+            Toast.makeText(this, "Dieses Gerät wurde bereits der Liste von gekoppelten Geräten hinzugefügt", Toast.LENGTH_SHORT).show();
+        }
 
 
     }
 
-    public void connectToDiscoveredBluetoothDevice(BluetoothDevice newDevice) throws IOException {
 
-        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //Standard SerialPortService ID
-        mmSocket = newDevice.createRfcommSocketToServiceRecord(uuid);
-        mmSocket.connect();
-        mmOutputStream = mmSocket.getOutputStream();
-        mmInputStream = mmSocket.getInputStream();
 
-        //Optional
 
-        Toast.makeText(getApplicationContext(), "Verbindung wurde hergestellt", Toast.LENGTH_SHORT).show();
-        resetConnection();
-        checkForPairedDevices();
-    }
-    private void resetConnection() {
-        if (mmInputStream != null) {
-            try {mmInputStream.close();} catch (Exception e) {
-                Toast.makeText(this, "Inputstream konnte nicht geschlossen werden", Toast.LENGTH_SHORT).show();
-            }
-            mmInputStream = null;
-        }
 
-        if (mmOutputStream != null) {
-            try {mmOutputStream.close();} catch (Exception e) {
-                Toast.makeText(this, "Outputstream konnte nicht geschlossen werden", Toast.LENGTH_SHORT).show();
-            }
-            mmOutputStream = null;
-        }
-
-        if (mmSocket != null) {
-            try {mmSocket.close();} catch (Exception e) {
-                Toast.makeText(this, "Socket konnte nicht geschlossen werden", Toast.LENGTH_SHORT).show();
-            }
-            mmSocket = null;
-        }
-
-    }
 
 
 }

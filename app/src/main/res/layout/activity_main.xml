@@ -58,7 +58,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/holo_green_dark"
-            android:text="Such nach noch nciht verbundenen Geräten"
+            android:text="Such nach noch nicht verbundenen Geräten"
             android:textSize="18sp"
             android:textStyle="bold" />
 
