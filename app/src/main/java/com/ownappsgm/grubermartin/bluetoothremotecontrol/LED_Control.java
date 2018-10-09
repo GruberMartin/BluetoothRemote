@@ -91,6 +91,8 @@ public class LED_Control extends AppCompatActivity {
         //Optional
 
         Toast.makeText(getApplicationContext(), "Verbindung wurde hergestellt", Toast.LENGTH_SHORT).show();
+        btnLedOnLedControl.setEnabled(true);
+        btnLedOffLedControl.setEnabled(true);
 
     }
 
