@@ -34,5 +34,11 @@
             android:layout_height="wrap_content"
             android:onClick="OnBtnLedOffClicked"
             android:text="Led off" />
+
+        <ImageView
+            android:id="@+id/ivIndicatingLedState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/greenledoff" />
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +26,7 @@ public class LED_Control extends AppCompatActivity {
     BluetoothDevice mmDevice;
     OutputStream mmOutputStream;
     InputStream mmInputStream;
+    ImageView ivIndicatingLedState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +35,8 @@ public class LED_Control extends AppCompatActivity {
         tvActionDescriptionLedControl = (TextView) findViewById(R.id.tvActionDescriptionLedControl);
         btnLedOnLedControl = (Button) findViewById(R.id.btnLedOnLedControl);
         btnLedOffLedControl = (Button) findViewById(R.id.btnLedOffLedControl);
+        ivIndicatingLedState = (ImageView) findViewById(R.id.ivIndicatingLedState);
+        ivIndicatingLedState.setImageResource(R.drawable.greenledoff);
         Intent recieveDevice = getIntent();
         mmDevice = recieveDevice.getExtras().getParcelable("bluetoothDevice");
         if(mmDevice != null)
@@ -46,6 +50,9 @@ public class LED_Control extends AppCompatActivity {
                 btnLedOffLedControl.setEnabled(false);
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
                 alertDialogBuilder.setMessage("Es konnte keine Verbindung aufgebaut werden, möchtest du es erneut versuche?");
+                alertDialogBuilder.setTitle("Verbindungsversuch fehlgeschlagen");
+                alertDialogBuilder.setIcon(R.drawable.alert);
+
                 alertDialogBuilder.setPositiveButton("Ja", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -104,9 +111,11 @@ public class LED_Control extends AppCompatActivity {
     {
         try {
             sendData('e');
+            ivIndicatingLedState.setImageResource(R.drawable.greenledon);
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, "Senden fehlgeschlagen", Toast.LENGTH_SHORT).show();
+
         }
     }
 
@@ -114,9 +123,12 @@ public class LED_Control extends AppCompatActivity {
     {
         try {
             sendData('a');
+            ivIndicatingLedState.setImageResource(R.drawable.greenledoff);
+
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, "Senden fehlgeschlagen", Toast.LENGTH_SHORT).show();
+
         }
     }
 
