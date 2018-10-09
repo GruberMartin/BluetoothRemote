@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -197,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
             case "LED_Control":
                 Intent changeToActionActivity = new Intent(this,LED_Control.class);
                 changeToActionActivity.putExtra("bluetoothDevice",mmDevice);
-                //changeToActionActivity.putExtra("outputstream", (Parcelable) mmOutputStream);
+                String deliveringDevice = mmDevice.getName();
                 startActivity(changeToActionActivity);
             break;
             default:
@@ -228,15 +227,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void OnBtnConnectClicked(View v)
     {
-        try {
-            connectToBluetooth();
-            changeToSelctedActionActivity();
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Es konnte keine Verbindung hergestellt werden!!", Toast.LENGTH_SHORT).show();
-            resetConnection();
-        }
-
+        changeToSelctedActionActivity();
     }
 
     public void OnBtnFindDevicesClicked(View v)
@@ -304,18 +295,10 @@ public class MainActivity extends AppCompatActivity {
         int pos = spDiscoveredDevicesMain.getSelectedItemPosition();
         if(!pairedDevicesMap.containsKey(newDevicesObject.get(pos).getName())) {
             mmDevice = newDevicesObject.get(pos);
-            try {
-                connectToBluetooth();
-                changeToSelctedActionActivity();
-                pairedDevicesMap.put(newDevicesObject.get(pos).getName().toString(), newDevicesObject.get(pos));
-                pairedDeviceNamesList.add(newDevicesObject.get(pos).getName());
-                fillListWithPairedDevices();
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Es konnte keine Verbindung hergestellt werden!!", Toast.LENGTH_SHORT).show();
-                resetConnection();
-            }
-
+            changeToSelctedActionActivity();
+            pairedDevicesMap.put(newDevicesObject.get(pos).getName().toString(), newDevicesObject.get(pos));
+            pairedDeviceNamesList.add(newDevicesObject.get(pos).getName());
+            fillListWithPairedDevices();
         }
         else
         {
@@ -324,42 +307,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-
-    public void connectToBluetooth() throws IOException {
-        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //Standard SerialPortService ID
-        mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
-        mmSocket.connect();
-        mmOutputStream = mmSocket.getOutputStream();
-        mmInputStream = mmSocket.getInputStream();
-        //
-        Toast.makeText(getApplicationContext(), "Verbindung wurde hergestellt", Toast.LENGTH_SHORT).show();
-    }
-
-    private void resetConnection() {
-        if (mmInputStream != null) {
-            try {mmInputStream.close();} catch (Exception e) {
-                Toast.makeText(this, "Inputstream konnte nicht geschlossen werden", Toast.LENGTH_SHORT).show();
-            }
-            mmInputStream = null;
-        }
-
-        if (mmOutputStream != null) {
-            try {mmOutputStream.close();} catch (Exception e) {
-                Toast.makeText(this, "Outputstream konnte nicht geschlossen werden", Toast.LENGTH_SHORT).show();
-            }
-            mmOutputStream = null;
-        }
-
-        if (mmSocket != null) {
-            try {mmSocket.close();} catch (Exception e) {
-                Toast.makeText(this, "Socket konnte nicht geschlossen werden", Toast.LENGTH_SHORT).show();
-            }
-            mmSocket = null;
-        }
-
-    }
-
-
 
 
 
