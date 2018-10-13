@@ -59,20 +59,7 @@ public class LED_Control extends AppCompatActivity {
         resetConnection();
     }
 
-    public void openBT() throws IOException {
-        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //Standard SerialPortService ID
-        mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
-        mmSocket.connect();
-        mmOutputStream = mmSocket.getOutputStream();
-        mmInputStream = mmSocket.getInputStream();
 
-        //Optional
-
-        Toast.makeText(getApplicationContext(), "Verbindung wurde hergestellt", Toast.LENGTH_SHORT).show();
-        btnLedOnLedControl.setEnabled(true);
-        btnLedOffLedControl.setEnabled(true);
-
-    }
 
     public void sendData(char msg) throws IOException{
         mmOutputStream.write(msg);

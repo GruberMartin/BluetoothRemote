@@ -93,12 +93,36 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        generateListWithPairedDevices();
+        fillListWithPairedDevices();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        clearListWithNewDeviceNames();
+
+    }
+
     public void generateListWithNewBluetoothDeviceNames()
     {
         newDevicesName = new ArrayList<String>();
         devNameAdapter = new ArrayAdapter<String>(MainActivity.this,android.R.layout.simple_list_item_1, newDevicesName);
         spDiscoveredDevicesMain.setAdapter(devNameAdapter);
     }
+
+    public void clearListWithNewDeviceNames()
+    {
+        newDevicesName.clear();
+        devNameAdapter.notifyDataSetChanged();
+
+    }
+
+
 
     public void generateListWithNewBluetoothDeviceObjects()
     {
@@ -144,6 +168,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+
 
     public void checkForBluetooth()
     {
@@ -252,11 +278,13 @@ public class MainActivity extends AppCompatActivity {
                 BluetoothDevice newDiscoveredDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
                 String newBTdevice =newDiscoveredDevice.getName();
-                newDevicesName.add(newBTdevice);
-                newDevicesObject.add(newDiscoveredDevice);
-                Toast.makeText(context, "Gerät " + newBTdevice +" gefunden", Toast.LENGTH_SHORT).show();
-                devNameAdapter.notifyDataSetChanged();
-                btnConnectToNewDeviceMain.setEnabled(true);
+                if(!pairedDeviceNamesList.contains(newBTdevice)) {
+                    newDevicesName.add(newBTdevice);
+                    newDevicesObject.add(newDiscoveredDevice);
+                    Toast.makeText(context, "Gerät " + newBTdevice + " gefunden", Toast.LENGTH_SHORT).show();
+                    devNameAdapter.notifyDataSetChanged();
+                    btnConnectToNewDeviceMain.setEnabled(true);
+                }
 
 
             }
