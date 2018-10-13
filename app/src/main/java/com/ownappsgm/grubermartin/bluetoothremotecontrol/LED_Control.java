@@ -1,9 +1,11 @@
 package com.ownappsgm.grubermartin.bluetoothremotecontrol;
 
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -41,40 +43,9 @@ public class LED_Control extends AppCompatActivity {
         mmDevice = recieveDevice.getExtras().getParcelable("bluetoothDevice");
         if(mmDevice != null)
         {
-            try {
-                openBT();
-            } catch (IOException e) {
-                e.printStackTrace();
-                //Toast.makeText(this, "Kann keine Bluetoothverbindung herstellen", Toast.LENGTH_SHORT).show();
-                btnLedOnLedControl.setEnabled(false);
-                btnLedOffLedControl.setEnabled(false);
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-                alertDialogBuilder.setMessage("Es konnte keine Verbindung aufgebaut werden, möchtest du es erneut versuche?");
-                alertDialogBuilder.setTitle("Verbindungsversuch fehlgeschlagen");
-                alertDialogBuilder.setIcon(R.drawable.alert);
+            MyAsyncTask myAsyncTask = new MyAsyncTask(mmDevice);
+            myAsyncTask.execute();
 
-                alertDialogBuilder.setPositiveButton("Ja", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        try {
-                            Toast.makeText(LED_Control.this, "Erneuter Verbindungsversuch bitte warten!", Toast.LENGTH_LONG).show();
-                            openBT();
-                        } catch (IOException e1) {
-                            Toast.makeText(LED_Control.this, "Das hat leider immernoch nicht funktioniert", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(LED_Control.this, MainActivity.class));
-                        }
-                    }
-                });
-                alertDialogBuilder.setNegativeButton("Nein", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        startActivity(new Intent(LED_Control.this, MainActivity.class));
-                    }
-                });
-
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
-            }
         }
         else
         {
@@ -155,4 +126,81 @@ public class LED_Control extends AppCompatActivity {
         }
 
     }
+
+    private class MyAsyncTask extends AsyncTask<Void,Void,Boolean>
+    {
+        BluetoothDevice mmDevice = null;
+        Boolean connectionState = false;
+        ProgressDialog progress;
+
+
+        public MyAsyncTask(BluetoothDevice deviceToConnectTo) {
+            super();
+            mmDevice = deviceToConnectTo;
+
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            btnLedOnLedControl.setEnabled(false);
+            btnLedOffLedControl.setEnabled(false);
+             progress = new ProgressDialog(LED_Control.this);
+            progress.setTitle("Verbinde mit Bluetoothgerät");
+            progress.setMessage("Bitte warten");
+            progress.setCancelable(false);
+            progress.show();
+
+        }
+
+        @Override
+        protected void onPostExecute(Boolean connectionState) {
+            super.onPostExecute(connectionState);
+            if(connectionState)
+            {
+                progress.dismiss();
+                Toast.makeText(LED_Control.this, "Verbindung erfolgreich", Toast.LENGTH_SHORT).show();
+                btnLedOnLedControl.setEnabled(true);
+                btnLedOffLedControl.setEnabled(true);
+            }
+            else
+            {
+                progress.dismiss();
+                Toast.makeText(LED_Control.this, "Verbindung fehlgeschlagen", Toast.LENGTH_SHORT).show();
+            }
+
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"); //Standard SerialPortService ID
+            try {
+                mmSocket = mmDevice.createRfcommSocketToServiceRecord(uuid);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                mmSocket.connect();
+                connectionState = true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                mmOutputStream = mmSocket.getOutputStream();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                mmInputStream = mmSocket.getInputStream();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return connectionState;
+        }
+    }
+
+
+
+
 }
