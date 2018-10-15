@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.AlertDialogLayout;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -58,6 +59,8 @@ public class LED_Control extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         resetConnection();
+        Intent returnToMain = new Intent(this, MainActivity.class);
+        startActivity(returnToMain);
     }
 
 
@@ -147,7 +150,7 @@ public class LED_Control extends AppCompatActivity {
             if(connectionState)
             {
                 progress.dismiss();
-                Toast.makeText(LED_Control.this, "Verbindung erfolgreich", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(LED_Control.this, "Verbindung erfolgreich", Toast.LENGTH_SHORT).show();
                 btnLedOnLedControl.setEnabled(true);
                 btnLedOffLedControl.setEnabled(true);
             }
@@ -155,6 +158,28 @@ public class LED_Control extends AppCompatActivity {
             {
                 progress.dismiss();
                 Toast.makeText(LED_Control.this, "Verbindung fehlgeschlagen", Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LED_Control.this);
+                alertDialogBuilder.setMessage("Möchten Sie es erneut versuchen?");
+                alertDialogBuilder.setTitle("Verbinden fehlgeschlagen");
+
+                alertDialogBuilder.setPositiveButton("Ja", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        MyAsyncTask newTry = new MyAsyncTask(mmDevice);
+                        newTry.execute();
+                    }
+                });
+                alertDialogBuilder.setNegativeButton("Nein", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent returnToMainActivity = new Intent(LED_Control.this, MainActivity.class);
+                        startActivity(returnToMainActivity);
+                    }
+                });
+                AlertDialog newAlertDialog =  alertDialogBuilder.create();
+                newAlertDialog.show();
+
+
             }
 
         }
