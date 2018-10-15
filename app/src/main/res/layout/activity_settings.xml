@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Settings">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onBtnClicked"
+            android:text="Button" />
+
+        <TextView
+            android:id="@+id/tvUserInfoSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hier kannst du auswählen, welche Geräte in der Liste angezeigt werden sollen" />
+
+        <ListView
+            android:id="@+id/lvSelectDevicesToDisplayInPairedListSettings"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true" >
+
+        </ListView>
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>

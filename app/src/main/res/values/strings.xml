@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">BluetoothRemoteControl</string>
+    <string name="app_name">Bluetooth Fernsteuerung</string>
+    <string name="showPairedDevicesMenu">Anzeigen der verbundenen Geräte</string>
 </resources>

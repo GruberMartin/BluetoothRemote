@@ -9,10 +9,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,7 +25,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -29,7 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -73,24 +75,47 @@ public class MainActivity extends AppCompatActivity {
         btnConnectMain = (Button) findViewById(R.id.btnConnectMain);
         btnFindDevicesMain = (Button) findViewById(R.id.btnFindDevicesMain);
         btnConnectToNewDeviceMain = (Button) findViewById(R.id.btnConnectToNewDeviceMain);
+        setTitle("Bluetooth Geräte Steuern");
         // endregion
-                                                        btnConnectMain.setEnabled(false);
+        btnConnectMain.setEnabled(false);
         checkForBluetooth();
-
         //region Registrierung eines BroadcastReceivers um neue Geräte zu finden
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         registerReceiver(mReceiver,filter);
         //endregion
+        //region Listen generieren und füllen
         generateListWithNewBluetoothDeviceNames();
         generateListWithNewBluetoothDeviceObjects();
         generateListWithActions();
         generateListWithPairedDevices();
         fillListWithPairedDevices();
+        //endregion
+        btnConnectToNewDeviceMain.setEnabled(false);
 
-                                                        btnConnectToNewDeviceMain.setEnabled(false);
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.mainmenu,menu);
+
+        return true;
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int selectedItem = item.getItemId();
+
+        if(selectedItem == R.id.displayedDevicesInPairedListMenuItem)
+        {
+            Intent goToSettingsActivity = new Intent(this,Settings.class);
+            startActivity(goToSettingsActivity);
+        }
+
+        return true;
     }
 
     @Override
@@ -132,41 +157,43 @@ public class MainActivity extends AppCompatActivity {
     public void generateListWithPairedDevices()
     {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-        pairedDevicesMap = new HashMap<>();
-        if (pairedDevices.size() > 0) {
-            // There are paired devices. Get the name and address of each paired device.
-            pairedDeviceNamesList = new ArrayList<String>();
-            for (BluetoothDevice device : pairedDevices)
-            {
-                pairedDevicesMap.put(device.getName(),device);
-                pairedDeviceNamesList.add(device.getName());
+        if(mBluetoothAdapter.isEnabled()) {
+            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+            pairedDevicesMap = new HashMap<>();
+            if (pairedDevices.size() > 0) {
+                // There are paired devices. Get the name and address of each paired device.
+                pairedDeviceNamesList = new ArrayList<String>();
+                for (BluetoothDevice device : pairedDevices) {
+                    pairedDevicesMap.put(device.getName(), device);
+                    pairedDeviceNamesList.add(device.getName());
+                }
+            } else {
+                // Es wurden keine gekoppelten Geräte gefunden
+                Toast.makeText(this, "Es wurden keine verbundenen Geräte gefunden", Toast.LENGTH_SHORT).show();
             }
-        }
-        else
-        {
-            // Es wurden keine gekoppelten Geräte gefunden
-            Toast.makeText(this, "Es wurden keine verbundenen Geräte gefunden", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void fillListWithPairedDevices()
     {
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, pairedDeviceNamesList);
-        spDeviceListMain.setAdapter(arrayAdapter);
-        spDeviceListMain.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        BluetoothAdapter testAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(testAdapter.isEnabled()) {
+            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, pairedDeviceNamesList);
+            spDeviceListMain.setAdapter(arrayAdapter);
+            spDeviceListMain.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                mmDevice = pairedDevicesMap.get(pairedDeviceNamesList.get(position).toString());
-                btnConnectMain.setEnabled(true);
-            }
+                    mmDevice = pairedDevicesMap.get(pairedDeviceNamesList.get(position).toString());
+                    btnConnectMain.setEnabled(true);
+                }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
 
-            }
-        });
+                }
+            });
+        }
     }
 
 
@@ -188,6 +215,8 @@ public class MainActivity extends AppCompatActivity {
             {
                 // Wenn Bluetooth eingeschaltet wurde, soll überprüft werden ob Geräte bereits gekoppelt sind
                 generateListWithPairedDevices();
+                fillListWithPairedDevices();
+
 
             }
 
