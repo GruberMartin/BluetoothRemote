@@ -59,11 +59,16 @@ public class LED_Control extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         resetConnection();
+        /*Intent returnToMain = new Intent(this, MainActivity.class);
+        startActivity(returnToMain);*/ // wird im mit dem Alert Dialog sonst 2 mal ausgeführt wenn nein geklickt wird
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
         Intent returnToMain = new Intent(this, MainActivity.class);
         startActivity(returnToMain);
     }
-
-
 
     public void sendData(char msg) throws IOException{
         mmOutputStream.write(msg);
@@ -157,7 +162,6 @@ public class LED_Control extends AppCompatActivity {
             else
             {
                 progress.dismiss();
-                Toast.makeText(LED_Control.this, "Verbindung fehlgeschlagen", Toast.LENGTH_SHORT).show();
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LED_Control.this);
                 alertDialogBuilder.setMessage("Möchten Sie es erneut versuchen?");
                 alertDialogBuilder.setTitle("Verbinden fehlgeschlagen");
@@ -174,6 +178,7 @@ public class LED_Control extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         Intent returnToMainActivity = new Intent(LED_Control.this, MainActivity.class);
                         startActivity(returnToMainActivity);
+
                     }
                 });
                 AlertDialog newAlertDialog =  alertDialogBuilder.create();
