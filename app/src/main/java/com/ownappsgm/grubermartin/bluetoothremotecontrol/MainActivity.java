@@ -8,9 +8,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -118,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         if(selectedItem == R.id.displayedDevicesInPairedListMenuItem)
         {
             Intent goToSettingsActivity = new Intent(this,Settings.class);
-            goToSettingsActivity.putExtra("pairedDevicesList", (Serializable) pairedDeviceNamesList);
+            goToSettingsActivity.putExtra("pairedDevicesList", (Serializable) castSetToList(pairedDevicesMap.keySet()));
 
             startActivityForResult(goToSettingsActivity,FilteredPairedDevicesListRequest);
         }
@@ -166,6 +168,16 @@ public class MainActivity extends AppCompatActivity {
     {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if(mBluetoothAdapter.isEnabled()) {
+            // Überprüfen ob bereits einstellungen vorenommen wurden
+            final SharedPreferences myPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            Set<String> mySavedHashSet = new HashSet<>();
+            mySavedHashSet = myPrefs.getStringSet(prefPairedDevicesNameListKey,new HashSet<String>());
+
+            // TODO Es muss noch überprüft werden, wass passiert wenn ein neues Gerät hinzugefügt wird
+
+            // Wenn noch keine Geräte in der Option anzuzeigende Geräte ausgewählt wurde, soll das ausgeführt werden
+
+
             Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
             pairedDevicesMap = new HashMap<>();
             if (pairedDevices.size() > 0) {
@@ -173,13 +185,19 @@ public class MainActivity extends AppCompatActivity {
                 pairedDeviceNamesList = new ArrayList<String>();
                 for (BluetoothDevice device : pairedDevices) {
                     pairedDevicesMap.put(device.getName(), device);
-                    pairedDeviceNamesList.add(device.getName());
+                    if(mySavedHashSet.isEmpty()) {
+                        pairedDeviceNamesList.add(device.getName());
+                    }
                 }
             } else {
                 // Es wurden keine gekoppelten Geräte gefunden
                 Toast.makeText(this, "Es wurden keine verbundenen Geräte gefunden", Toast.LENGTH_SHORT).show();
             }
+            if(!mySavedHashSet.isEmpty()) {
+                pairedDeviceNamesList = castSetToList(mySavedHashSet);
+            }
         }
+
     }
 
     public void fillListWithPairedDevices()
@@ -253,13 +271,17 @@ public class MainActivity extends AppCompatActivity {
 
         if(requestCode == FilteredPairedDevicesListRequest)
         {
-            if(requestCode == RESULT_OK) {
+            if(resultCode == RESULT_OK) {
                 Intent getFileredPairedDevicesList = data;
                 updateForPairedDevicesList = new ArrayList<String>();
                 updateForPairedDevicesList = getFileredPairedDevicesList.getStringArrayListExtra("deliveredFilteredPairedDevicesList");
                 if (updateForPairedDevicesList != null) {
-                    pairedDeviceNamesList.clear();
-                    pairedDeviceNamesList = updateForPairedDevicesList;
+                    //ToDo überprüfen ob die unteren beiden Statments nötig sind
+                    final SharedPreferences myPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    SharedPreferences.Editor editPrefs = myPrefs.edit();
+                    editPrefs.putStringSet(prefPairedDevicesNameListKey,castListToSet(updateForPairedDevicesList));
+                    editPrefs.commit();
+                    generateListWithPairedDevices();
                     fillListWithPairedDevices();
                 }
             }
@@ -387,8 +409,26 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // Weil ArrayLists nicht als Prefs gespeichert werden können, wird hier ein Set daraus gemacht
+    public Set<String> castListToSet(ArrayList<String> list)
+    {
+        Set<String> castedArrayList = new HashSet<String>();
+        for(String element : list)
+        {
+            castedArrayList.add(element);
+        }
+        return castedArrayList;
+    }
 
-
+    public ArrayList<String> castSetToList(Set<String> set)
+    {
+        ArrayList<String> castedSet = new ArrayList<String>();
+        for(String element : set)
+        {
+            castedSet.add(element);
+        }
+        return castedSet;
+    }
 
 
 
