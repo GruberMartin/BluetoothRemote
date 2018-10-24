@@ -25,7 +25,8 @@
         <activity
             android:name=".LED_Control"
             android:screenOrientation="portrait" />
-        <activity android:name=".Settings"></activity>
+        <activity android:name=".Settings" />
+        <activity android:name=".LED_Control_Settings"></activity>
     </application>
 
 </manifest>

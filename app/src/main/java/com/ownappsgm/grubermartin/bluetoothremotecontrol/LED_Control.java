@@ -10,6 +10,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AlertDialogLayout;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -162,7 +165,7 @@ public class LED_Control extends AppCompatActivity {
             else
             {
                 progress.dismiss();
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LED_Control.this);
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LED_Control.this,android.R.style.Theme_Material_Dialog_Alert);
                 alertDialogBuilder.setMessage("Möchten Sie es erneut versuchen?");
                 alertDialogBuilder.setTitle("Verbinden fehlgeschlagen");
 
@@ -182,6 +185,7 @@ public class LED_Control extends AppCompatActivity {
                     }
                 });
                 AlertDialog newAlertDialog =  alertDialogBuilder.create();
+
                 newAlertDialog.show();
 
 
@@ -217,8 +221,27 @@ public class LED_Control extends AppCompatActivity {
             return connectionState;
         }
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.led_control_menu,menu);
 
+        return true;
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int selectedItem = item.getItemId();
+
+        if(selectedItem == R.id.displayCommandChars)
+        {
+            Intent goToLedControlSettings = new Intent(this, LED_Control_Settings.class);
+            startActivity(goToLedControlSettings);
+        }
+
+        return true;
+    }
 
 
 }

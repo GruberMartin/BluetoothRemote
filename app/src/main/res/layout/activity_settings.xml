@@ -11,13 +11,6 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/button2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="onBtnClicked"
-            android:text="Button" />
-
         <TextView
             android:id="@+id/tvUserInfoSettings"
             android:layout_width="match_parent"
@@ -28,8 +21,27 @@
             android:id="@+id/lvSelectDevicesToDisplayInPairedListSettings"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clickable="true" >
+            android:layout_weight="10"
+            android:clickable="true">
 
         </ListView>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:onClick="onBtnClicked"
+            android:text="Speichern" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -27,8 +28,10 @@ import android.widget.Toast;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,9 +54,12 @@ public class MainActivity extends AppCompatActivity {
     List<String> supportedActions;
     List <String> newDevicesName;
     ArrayAdapter<String> devNameAdapter;
+    ArrayList<String> updateForPairedDevicesList;
+    final String prefPairedDevicesNameListKey = "pairedDevicesNameList";
 
     int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
     int REQUEST_ENABLE_BT = 2; // erhält Result Code
+    static final int FilteredPairedDevicesListRequest = 4;
     OutputStream mmOutputStream = null;
     InputStream mmInputStream = null;
     BluetoothSocket mmSocket = null;
@@ -112,7 +118,9 @@ public class MainActivity extends AppCompatActivity {
         if(selectedItem == R.id.displayedDevicesInPairedListMenuItem)
         {
             Intent goToSettingsActivity = new Intent(this,Settings.class);
-            startActivity(goToSettingsActivity);
+            goToSettingsActivity.putExtra("pairedDevicesList", (Serializable) pairedDeviceNamesList);
+
+            startActivityForResult(goToSettingsActivity,FilteredPairedDevicesListRequest);
         }
 
         return true;
@@ -242,6 +250,22 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Wenn du Bluetooth nicht einschaltest, kannst du nicht weiterfahren!", Toast.LENGTH_SHORT).show();
             }
         }
+
+        if(requestCode == FilteredPairedDevicesListRequest)
+        {
+            if(requestCode == RESULT_OK) {
+                Intent getFileredPairedDevicesList = data;
+                updateForPairedDevicesList = new ArrayList<String>();
+                updateForPairedDevicesList = getFileredPairedDevicesList.getStringArrayListExtra("deliveredFilteredPairedDevicesList");
+                if (updateForPairedDevicesList != null) {
+                    pairedDeviceNamesList.clear();
+                    pairedDeviceNamesList = updateForPairedDevicesList;
+                    fillListWithPairedDevices();
+                }
+            }
+
+
+        }
     }
 
     public void changeToSelctedActionActivity()
@@ -307,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
                 BluetoothDevice newDiscoveredDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
                 String newBTdevice =newDiscoveredDevice.getName();
-                if(!pairedDeviceNamesList.contains(newBTdevice)) {
+                if(!pairedDeviceNamesList.contains(newBTdevice) && newDiscoveredDevice != null && newBTdevice != null) {
                     newDevicesName.add(newBTdevice);
                     newDevicesObject.add(newDiscoveredDevice);
                     Toast.makeText(context, "Gerät " + newBTdevice + " gefunden", Toast.LENGTH_SHORT).show();

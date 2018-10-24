@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusedByDefault="false"
+    tools:context=".LED_Control_Settings">
+
+    <Button
+        android:id="@+id/btnLedOnSetting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="LED ON"
+        app:layout_constraintBottom_toTopOf="@+id/btnLedOffSetting"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.724" />
+
+    <Button
+        android:id="@+id/btnLedOffSetting"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="64dp"
+        android:layout_marginBottom="192dp"
+        android:text="Led Off"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/etLedOnCommand"
+        android:layout_width="187dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:defaultFocusHighlightEnabled="false"
+        android:ems="10"
+        android:focusedByDefault="false"
+        android:hint="Char Led ein"
+        android:inputType="textCapCharacters"
+        android:maxLength="1"
+        android:selectAllOnFocus="false"
+        android:singleLine="true"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="@+id/btnLedOnSetting"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.724"
+        app:layout_constraintStart_toEndOf="@+id/btnLedOnSetting"
+        app:layout_constraintTop_toTopOf="@+id/btnLedOnSetting"
+        app:layout_constraintVertical_bias="0.303" />
+
+    <EditText
+        android:id="@+id/etLedOffCommand"
+        android:layout_width="187dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:defaultFocusHighlightEnabled="false"
+        android:ems="10"
+        android:hint="Char Led aus"
+        android:inputType="textCapCharacters"
+        android:maxLength="1"
+        android:selectAllOnFocus="false"
+        android:singleLine="true"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="@+id/btnLedOffSetting"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.515"
+        app:layout_constraintStart_toEndOf="@+id/btnLedOffSetting"
+        app:layout_constraintTop_toTopOf="@+id/btnLedOffSetting" />
+
+    <TextView
+        android:id="@+id/tvUserHintLedSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="Hier kannst du auswählen, welcher Buchstabe gesendet wird wenn du einen Knopf drückst"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</android.support.constraint.ConstraintLayout>
