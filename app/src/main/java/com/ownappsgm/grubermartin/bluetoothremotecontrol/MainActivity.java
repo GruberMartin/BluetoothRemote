@@ -154,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
     {
         newDevicesName.clear();
         devNameAdapter.notifyDataSetChanged();
+        btnConnectToNewDeviceMain.setEnabled(false);
 
     }
 

@@ -187,7 +187,7 @@ public class LED_Control extends AppCompatActivity {
                 alertDialogBuilder.setNegativeButton("Nein", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                    
+
                         finish();
 
 
