@@ -44,7 +44,9 @@ public class LED_Control extends AppCompatActivity {
         ivIndicatingLedState = (ImageView) findViewById(R.id.ivIndicatingLedState);
         ivIndicatingLedState.setImageResource(R.drawable.greenledoff);
         Intent recieveDevice = getIntent();
+
         mmDevice = recieveDevice.getExtras().getParcelable("bluetoothDevice");
+
         if(mmDevice != null)
         {
             MyAsyncTask myAsyncTask = new MyAsyncTask(mmDevice);
@@ -63,8 +65,7 @@ public class LED_Control extends AppCompatActivity {
         super.onStop();
         resetConnection();
         finish();
-        /*Intent returnToMain = new Intent(this, MainActivity.class);
-        startActivity(returnToMain);*/ // wird im mit dem Alert Dialog sonst 2 mal ausgeführt wenn nein geklickt wird
+
     }
 
     @Override
@@ -246,6 +247,7 @@ public class LED_Control extends AppCompatActivity {
         if(selectedItem == R.id.displayCommandChars)
         {
             Intent goToLedControlSettings = new Intent(this, LED_Control_Settings.class);
+            goToLedControlSettings.putExtra("saveCurrentDevice",mmDevice);
             startActivity(goToLedControlSettings);
         }
 
