@@ -62,8 +62,15 @@ public class LED_Control extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         resetConnection();
+        finish();
         /*Intent returnToMain = new Intent(this, MainActivity.class);
         startActivity(returnToMain);*/ // wird im mit dem Alert Dialog sonst 2 mal ausgeführt wenn nein geklickt wird
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        finish();
     }
 
     @Override
@@ -71,6 +78,7 @@ public class LED_Control extends AppCompatActivity {
         super.onRestart();
         Intent returnToMain = new Intent(this, MainActivity.class);
         startActivity(returnToMain);
+        finish();
     }
 
     public void sendData(char msg) throws IOException{
@@ -179,8 +187,9 @@ public class LED_Control extends AppCompatActivity {
                 alertDialogBuilder.setNegativeButton("Nein", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent returnToMainActivity = new Intent(LED_Control.this, MainActivity.class);
-                        startActivity(returnToMainActivity);
+                    
+                        finish();
+
 
                     }
                 });
