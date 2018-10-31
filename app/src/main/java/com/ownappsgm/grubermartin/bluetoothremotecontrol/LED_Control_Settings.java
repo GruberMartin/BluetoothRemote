@@ -6,12 +6,14 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class LED_Control_Settings extends AppCompatActivity implements View.OnClickListener {
+public class LED_Control_Settings extends AppCompatActivity implements View.OnClickListener, TextView.OnEditorActionListener {
 
     TextView tvUserHintLedSettings;
     Button btnLedOnSetting, btnLedOffSetting, btnSaveLedSettings;
@@ -36,6 +38,7 @@ public class LED_Control_Settings extends AppCompatActivity implements View.OnCl
         etLedOffCommand.setText(prefs.getString(PrefBtnCommandOffKey,"a"));
         etLedOnCommand.setText(prefs.getString(PrefBtnCommandOnKey,"e"));
         etLedOffCommand.setOnClickListener(this);
+        etLedOnCommand.setOnEditorActionListener(this);
         etLedOnCommand.setOnClickListener(this);
         btnSaveLedSettings.setOnClickListener(this);
         etLedOnCommand.setCursorVisible(false);
@@ -69,5 +72,31 @@ public class LED_Control_Settings extends AppCompatActivity implements View.OnCl
                 finish();
                 break;
         }
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        boolean handled = false;
+        if (actionId == EditorInfo.IME_ACTION_NEXT) {
+            etLedOnCommand.setCursorVisible(false);
+            etLedOnCommand.setFocusable(false);
+            etLedOffCommand.setCursorVisible(true);
+            etLedOffCommand.setFocusable(true);
+            handled = true;
+        }
+
+        if(actionId == EditorInfo.IME_ACTION_DONE)
+        {
+            etLedOnCommand.setCursorVisible(false);
+            etLedOnCommand.setFocusable(false);
+            etLedOffCommand.setCursorVisible(false);
+            etLedOffCommand.setSelected(true);
+            etLedOffCommand.setFocusable(false);
+            btnSaveLedSettings.performClick();
+
+            handled = true;
+        }
+        return handled;
+
     }
 }

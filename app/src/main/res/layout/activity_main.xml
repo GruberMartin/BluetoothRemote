@@ -19,7 +19,7 @@
             android:id="@+id/tvPairedDeviceHintMain"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/holo_green_dark"
+            android:background="@color/colorAccent"
             android:text="Bedienen von bereits verbundenen Geräten"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -57,7 +57,7 @@
             android:id="@+id/tvSearchForDevicesHintMain"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/holo_green_dark"
+            android:background="@color/colorAccent"
             android:text="Such nach noch nicht verbundenen Geräten"
             android:textSize="18sp"
             android:textStyle="bold" />
