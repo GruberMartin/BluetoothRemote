@@ -71,11 +71,7 @@ public class LED_Control extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        finish();
-    }
+
 
     @Override
     protected void onRestart() {
@@ -224,7 +220,7 @@ public class LED_Control extends AppCompatActivity {
                 e.printStackTrace();
                 Log.e("tag2","Problem mit connect");
                 deviceNeedsPassword = true;
-                handelPasswordInput(mmSocket);
+                //handelPasswordInput(mmSocket);
             }
             try {
                 mmOutputStream = mmSocket.getOutputStream();
