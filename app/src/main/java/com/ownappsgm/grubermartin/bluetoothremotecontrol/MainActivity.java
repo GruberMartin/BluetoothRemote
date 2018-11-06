@@ -1,11 +1,13 @@
 package com.ownappsgm.grubermartin.bluetoothremotecontrol;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -296,6 +298,44 @@ public class MainActivity extends AppCompatActivity {
     public void changeToSelctedActionActivity()
     {
 
+        generateListWithActions();
+
+        if(mmDevice == null)
+        {
+            // Dieser teil wird ausgeführt, wenn das Gerät nachträglich enkoppelt wurde, aber durch das Prefernce immer noch in der Liste der Verfügbahren geräte seteht
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this,android.R.style.Theme_Material_Dialog_Alert);
+            builder.setTitle("Das ausgewählte Gerät ist nicht gekoppelt !");
+            builder.setIcon(R.drawable.alert);
+            builder.setMessage("Wählen Sie eine entsprechende Aktion");
+            builder.setPositiveButton("Suche nach Gerät",new DialogInterface.OnClickListener()
+            {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if(btnFindDevicesMain != null) {
+                        btnFindDevicesMain.performClick();
+                    }
+                }
+            });
+            builder.setNegativeButton("Das ausgewählte Gerät entfernen", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // Die Liste wird aktualisert
+                    Intent updatePrefList = new Intent(MainActivity.this, Settings.class);
+                    updatePrefList.putExtra("pairedDevicesList", (Serializable) castSetToList(pairedDevicesMap.keySet()));
+                    updatePrefList.putExtra("updatePrefListCommand",true);
+                    if(btAdapter != null)
+                    {
+                        btAdapter.cancelDiscovery();
+                    }
+                    startActivityForResult(updatePrefList,FilteredPairedDevicesListRequest);
+                }
+            });
+
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+            selectedAction = "Fehler";
+        }
+
         if(btAdapter != null)
         {
             btAdapter.cancelDiscovery();
@@ -308,6 +348,9 @@ public class MainActivity extends AppCompatActivity {
                 String deliveringDevice = mmDevice.getName();
                 startActivity(changeToActionActivity);
             break;
+            case "Fehler":
+                Toast.makeText(this, "Es kann kein Gerät übergeben werden", Toast.LENGTH_LONG).show();
+                break;
             default:
                 Toast.makeText(this, "Es wurde keine Aktion ausgewählt", Toast.LENGTH_SHORT).show();
                 break;

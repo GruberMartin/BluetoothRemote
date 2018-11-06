@@ -34,6 +34,7 @@ public class Settings extends AppCompatActivity {
     final String prefKey = "filteredPairedDevicesList";
     HashSet<String> filteredPairedDevicesList;
     Set<String> getFilteredPairedDevicesList;
+    Boolean updateListProgrammatically;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,21 +43,30 @@ public class Settings extends AppCompatActivity {
         tvUserInfoSettings = (TextView) findViewById(R.id.tvUserInfoSettings);
         btnSave = (Button) findViewById(R.id.btnSave);
         lvSelectDevicesToDisplayInPairedListSettings = (ListView) findViewById(R.id.lvSelectDevicesToDisplayInPairedListSettings);
-        list = new ArrayList<String>();
-        Intent getExtras = getIntent();
-        list = getExtras.getStringArrayListExtra("pairedDevicesList");
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,list);
-        lvSelectDevicesToDisplayInPairedListSettings.setAdapter(adapter);
-        lvSelectDevicesToDisplayInPairedListSettings.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        getFilteredPairedDevicesList = new HashSet<String>();
-        final SharedPreferences myPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        getFilteredPairedDevicesList = myPrefs.getStringSet(prefKey,getFilteredPairedDevicesList);
+        updateListProgrammatically = getIntent().getBooleanExtra("updatePrefListCommand",false);
 
-        for(String element : getFilteredPairedDevicesList)
+
+            list = new ArrayList<String>();
+            Intent getExtras = getIntent();
+            list = getExtras.getStringArrayListExtra("pairedDevicesList");
+            final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_multiple_choice,list);
+            lvSelectDevicesToDisplayInPairedListSettings.setAdapter(adapter);
+            lvSelectDevicesToDisplayInPairedListSettings.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+            getFilteredPairedDevicesList = new HashSet<String>();
+            final SharedPreferences myPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            getFilteredPairedDevicesList = myPrefs.getStringSet(prefKey,getFilteredPairedDevicesList);
+
+            for(String element : getFilteredPairedDevicesList)
+            {
+
+                lvSelectDevicesToDisplayInPairedListSettings.setItemChecked( list.indexOf(element),true);
+            }
+        if(updateListProgrammatically) // muss genau hier stehen
         {
+            btnSave.performClick();
 
-            lvSelectDevicesToDisplayInPairedListSettings.setItemChecked( list.indexOf(element),true);
         }
+
 
     }
 
