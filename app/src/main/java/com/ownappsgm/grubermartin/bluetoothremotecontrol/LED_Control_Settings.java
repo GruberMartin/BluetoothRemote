@@ -12,6 +12,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class LED_Control_Settings extends AppCompatActivity implements View.OnClickListener, TextView.OnEditorActionListener {
 
@@ -23,6 +24,7 @@ public class LED_Control_Settings extends AppCompatActivity implements View.OnCl
 
     final String PrefBtnCommandOnKey = "btnCommandOnKey";
     final String PrefBtnCommandOffKey = "btnCommandOffKey";
+    Boolean testBool;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +41,7 @@ public class LED_Control_Settings extends AppCompatActivity implements View.OnCl
         etLedOnCommand.setText(prefs.getString(PrefBtnCommandOnKey,"e"));
         etLedOffCommand.setOnClickListener(this);
         etLedOnCommand.setOnEditorActionListener(this);
+        etLedOffCommand.setOnEditorActionListener(this);
         etLedOnCommand.setOnClickListener(this);
         btnSaveLedSettings.setOnClickListener(this);
         etLedOnCommand.setCursorVisible(false);
@@ -77,11 +80,13 @@ public class LED_Control_Settings extends AppCompatActivity implements View.OnCl
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         boolean handled = false;
+
         if (actionId == EditorInfo.IME_ACTION_NEXT) {
             etLedOnCommand.setCursorVisible(false);
             etLedOnCommand.setFocusable(false);
             etLedOffCommand.setCursorVisible(true);
             etLedOffCommand.setFocusable(true);
+
             handled = true;
         }
 
@@ -90,13 +95,18 @@ public class LED_Control_Settings extends AppCompatActivity implements View.OnCl
             etLedOnCommand.setCursorVisible(false);
             etLedOnCommand.setFocusable(false);
             etLedOffCommand.setCursorVisible(false);
-            etLedOffCommand.setSelected(true);
+            etLedOffCommand.setSelected(false);
             etLedOffCommand.setFocusable(false);
-            btnSaveLedSettings.performClick();
+            performClick(btnSaveLedSettings);
+
 
             handled = true;
         }
         return handled;
 
+    }
+
+    public static boolean performClick(View view) {
+        return view.isEnabled() && view.isClickable() && view.performClick();
     }
 }

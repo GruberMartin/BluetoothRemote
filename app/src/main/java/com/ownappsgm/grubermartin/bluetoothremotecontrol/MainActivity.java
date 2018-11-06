@@ -59,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> updateForPairedDevicesList;
     final String prefPairedDevicesNameListKey = "pairedDevicesNameList";
 
+    BluetoothAdapter btAdapter;
+
     int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
     int REQUEST_ENABLE_BT = 2; // erhält Result Code
     static final int FilteredPairedDevicesListRequest = 4;
@@ -293,6 +295,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void changeToSelctedActionActivity()
     {
+
+        if(btAdapter != null)
+        {
+            btAdapter.cancelDiscovery();
+        }
         switch (selectedAction)
         {
             case "LED_Control":
@@ -387,7 +394,7 @@ public class MainActivity extends AppCompatActivity {
         }
         else
         {
-            BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+            btAdapter = BluetoothAdapter.getDefaultAdapter();
             btAdapter.startDiscovery();
         }
 
@@ -399,7 +406,13 @@ public class MainActivity extends AppCompatActivity {
         int pos = spDiscoveredDevicesMain.getSelectedItemPosition();
         if(!pairedDevicesMap.containsKey(newDevicesObject.get(pos).getName())) {
             mmDevice = newDevicesObject.get(pos);
+            if(btAdapter != null)
+            {
+                btAdapter.cancelDiscovery();
+            }
             changeToSelctedActionActivity();
+
+
 
         }
         else

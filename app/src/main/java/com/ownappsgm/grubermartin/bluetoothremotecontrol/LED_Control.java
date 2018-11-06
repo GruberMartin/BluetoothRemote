@@ -10,6 +10,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AlertDialogLayout;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -33,6 +34,8 @@ public class LED_Control extends AppCompatActivity {
     OutputStream mmOutputStream;
     InputStream mmInputStream;
     ImageView ivIndicatingLedState;
+
+    Boolean deviceNeedsPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,7 +157,7 @@ public class LED_Control extends AppCompatActivity {
             btnLedOnLedControl.setEnabled(false);
             btnLedOffLedControl.setEnabled(false);
              progress = new ProgressDialog(LED_Control.this);
-            progress.setTitle("Verbinde mit Bluetoothgerät");
+            progress.setTitle("Verbinde mit " + mmDevice.getName());
             progress.setMessage("Bitte warten");
             progress.setCancelable(false);
             progress.show();
@@ -176,7 +179,7 @@ public class LED_Control extends AppCompatActivity {
                 progress.dismiss();
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(LED_Control.this,android.R.style.Theme_Material_Dialog_Alert);
                 alertDialogBuilder.setMessage("Möchten Sie es erneut versuchen?");
-                alertDialogBuilder.setTitle("Verbinden fehlgeschlagen");
+                alertDialogBuilder.setTitle("Verbinden zu " + mmDevice.getName() + " fehlgeschlagen");
 
                 alertDialogBuilder.setPositiveButton("Ja", new DialogInterface.OnClickListener() {
                     @Override
@@ -211,12 +214,17 @@ public class LED_Control extends AppCompatActivity {
 
             } catch (IOException e) {
                 e.printStackTrace();
+                Log.e("tag1","Problem mit Socket");
             }
             try {
+
                 mmSocket.connect();
                 connectionState = true;
             } catch (IOException e) {
                 e.printStackTrace();
+                Log.e("tag2","Problem mit connect");
+                deviceNeedsPassword = true;
+                handelPasswordInput(mmSocket);
             }
             try {
                 mmOutputStream = mmSocket.getOutputStream();
@@ -252,6 +260,12 @@ public class LED_Control extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    public void handelPasswordInput(BluetoothSocket socket)
+    {
+        BluetoothSocket newSocket = socket;
+        Toast.makeText(this, newSocket.isConnected() + "", Toast.LENGTH_SHORT).show();
     }
 
 
