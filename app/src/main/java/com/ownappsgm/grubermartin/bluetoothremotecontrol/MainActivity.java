@@ -26,6 +26,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     Spinner spDeviceListMain, spActionSelectMain, spDiscoveredDevicesMain;
     TextView tvPairedDeviceHintMain, tvSelectDeviceMain, tvChooseAnActionMain, tvSearchForDevicesHintMain, tvDiscoveredDevicesMain;
     Button btnConnectMain, btnFindDevicesMain, btnConnectToNewDeviceMain;
+    ProgressBar pbSearchInProgress;
 
     Map<String,BluetoothDevice> pairedDevicesMap;
     List<String> pairedDeviceNamesList;
@@ -60,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayAdapter<String> devNameAdapter;
     ArrayList<String> updateForPairedDevicesList;
     final String prefPairedDevicesNameListKey = "pairedDevicesNameList";
+
 
     BluetoothAdapter btAdapter;
 
@@ -88,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
         btnFindDevicesMain = (Button) findViewById(R.id.btnFindDevicesMain);
         btnConnectToNewDeviceMain = (Button) findViewById(R.id.btnConnectToNewDeviceMain);
         setTitle("Bluetooth Geräte Steuern");
+        pbSearchInProgress = (ProgressBar) findViewById(R.id.pbSearchInProgress);
+        pbSearchInProgress.setVisibility(View.INVISIBLE);
         // endregion
         btnConnectMain.setEnabled(false);
         checkForBluetooth();
@@ -106,6 +111,12 @@ public class MainActivity extends AppCompatActivity {
         //endregion
         btnConnectToNewDeviceMain.setEnabled(false);
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -423,13 +434,16 @@ public class MainActivity extends AppCompatActivity {
             }
             else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
             {
-                Toast.makeText(context, "Suche beendet", Toast.LENGTH_SHORT).show();
-
+                //Toast.makeText(context, "Suche beendet", Toast.LENGTH_SHORT).show();
+                pbSearchInProgress.setVisibility(View.INVISIBLE);
 
             }
             else if(BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action))
             {
-                Toast.makeText(context, "Beginne mit der Suche", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context, "Beginne mit der Suche", Toast.LENGTH_SHORT).show();
+                pbSearchInProgress.setVisibility(View.VISIBLE);
+
+
             }
         }
     };
