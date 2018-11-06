@@ -307,15 +307,6 @@ public class MainActivity extends AppCompatActivity {
             builder.setTitle("Das ausgewählte Gerät ist nicht gekoppelt !");
             builder.setIcon(R.drawable.alert);
             builder.setMessage("Wählen Sie eine entsprechende Aktion");
-            builder.setPositiveButton("Suche nach Gerät",new DialogInterface.OnClickListener()
-            {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if(btnFindDevicesMain != null) {
-                        btnFindDevicesMain.performClick();
-                    }
-                }
-            });
             builder.setNegativeButton("Das ausgewählte Gerät entfernen", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -379,15 +370,31 @@ public class MainActivity extends AppCompatActivity {
 
     public void OnBtnConnectClicked(View v)
     {
-        changeToSelctedActionActivity();
+        BluetoothAdapter testAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(testAdapter.isEnabled()) {
+            changeToSelctedActionActivity();
+        }
+        else
+        {
+            Toast.makeText(this, "Bitte Bluetooth einschalten", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void OnBtnFindDevicesClicked(View v)
     {
-        askForBluetoothPermission();
-        newDevicesName.clear();
-        newDevicesObject.clear();
-        btnConnectToNewDeviceMain.setEnabled(false);
+        BluetoothAdapter testAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(testAdapter.isEnabled())
+        {
+            askForBluetoothPermission();
+            newDevicesName.clear();
+            newDevicesObject.clear();
+            btnConnectToNewDeviceMain.setEnabled(false);
+        }
+        else
+        {
+            Toast.makeText(this, "Bitte Bluetooth einschalten", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     //region Implementierung des Broadcast Receivers
@@ -434,6 +441,7 @@ public class MainActivity extends AppCompatActivity {
         {
             // Permission is not granted
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+            // TODO wenn das gewährt wird, sollen die Geräte Gesucht werden, (Fehler bei neu Installation)
         }
         else
         {
@@ -445,23 +453,31 @@ public class MainActivity extends AppCompatActivity {
 
     public void onBtnConnectToNewDeviceClicked(View v)
     {
+        BluetoothAdapter testAdapter = BluetoothAdapter.getDefaultAdapter();
+        if(testAdapter.isEnabled())
+        {int pos = spDiscoveredDevicesMain.getSelectedItemPosition();
+            if(!pairedDevicesMap.containsKey(newDevicesObject.get(pos).getName())) {
+                mmDevice = newDevicesObject.get(pos);
+                if(btAdapter != null)
+                {
+                    btAdapter.cancelDiscovery();
+                }
+                changeToSelctedActionActivity();
 
-        int pos = spDiscoveredDevicesMain.getSelectedItemPosition();
-        if(!pairedDevicesMap.containsKey(newDevicesObject.get(pos).getName())) {
-            mmDevice = newDevicesObject.get(pos);
-            if(btAdapter != null)
-            {
-                btAdapter.cancelDiscovery();
+
+
             }
-            changeToSelctedActionActivity();
-
-
+            else
+            {
+                Toast.makeText(this, "Dieses Gerät wurde bereits der Liste von gekoppelten Geräten hinzugefügt", Toast.LENGTH_SHORT).show();
+            }
 
         }
         else
         {
-            Toast.makeText(this, "Dieses Gerät wurde bereits der Liste von gekoppelten Geräten hinzugefügt", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Bitte Bluetooth einschalten", Toast.LENGTH_SHORT).show();
         }
+
 
 
     }
@@ -486,6 +502,8 @@ public class MainActivity extends AppCompatActivity {
         }
         return castedSet;
     }
+
+
 
 
 
