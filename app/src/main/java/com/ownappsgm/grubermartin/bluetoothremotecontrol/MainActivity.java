@@ -15,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -42,9 +43,9 @@ import java.util.Map;
 import java.util.Set;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-
+ // Drücke Strg + Q um alles zusammenzuklappen
 
     // region Deklaration von Variablen
 
@@ -66,14 +67,11 @@ public class MainActivity extends AppCompatActivity {
 
 
     BluetoothAdapter btAdapter;
-    PairedDevices pairedDevices;
 
-    int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
+    static final int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
     int REQUEST_ENABLE_BT = 2; // erhält Result Code
     static final int FilteredPairedDevicesListRequest = 4;
     // endregion
-
-
 
     // region Lifecycle Methoden
     @Override
@@ -95,6 +93,11 @@ public class MainActivity extends AppCompatActivity {
         btnConnectToNewDeviceMain = (Button) findViewById(R.id.btnConnectToNewDeviceMain);
         pbSearchInProgress = (ProgressBar) findViewById(R.id.pbSearchInProgress);
         // endregion
+        //region Listener zuweiesen
+        btnConnectMain.setOnClickListener(this);
+        btnFindDevicesMain.setOnClickListener(this);
+        btnConnectToNewDeviceMain.setOnClickListener(this);
+        //endregion
         //region Einstellungen für Widgets
         pbSearchInProgress.setVisibility(View.INVISIBLE);
         btnConnectMain.setEnabled(false);
@@ -166,9 +169,7 @@ public class MainActivity extends AppCompatActivity {
     }
     // endregion
 
-
-
-
+    //region Funktionen für eine Liste mit Neuen Bluetoothgeräten
     public void generateListWithNewBluetoothDeviceNames()
     {
         newDevicesName = new ArrayList<String>();
@@ -184,14 +185,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-
     public void generateListWithNewBluetoothDeviceObjects()
     {
         newDevicesObject = new ArrayList<BluetoothDevice>();
     }
+    // endregion
 
-    // TODO Kann gelöscht werden
+    //region Funktionen für verbundene Bluetoothgerätliste
     public void generateListWithPairedDevices()
     {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -228,7 +228,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    // TODO Muss die Methoden der Klasse PairedDevices verwenden
     public void fillListWithPairedDevices()
     {
         BluetoothAdapter testAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -250,9 +249,29 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+    // endregion
 
+    //region Action List
+    public void generateListWithActions()
+    {
+        supportedActions = new ArrayList<String>();
+        supportedActions.add("LED_Control");
+        ArrayAdapter<String> arrayAdapter2 = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,supportedActions);
+        spActionSelectMain.setAdapter(arrayAdapter2);
+        spActionSelectMain.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedAction = supportedActions.get(position);
+            }
 
-    // TODO Kann gelöscht werden, wenn startActivityForResult abgefangen wird
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+    // endregion
+
     public void checkForBluetooth()
     {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -278,7 +297,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Überprüft ob Bluetooth verwendet werden kann und handelt entsprechend
+
+    // region Activitywechsel und -Resulatate
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Überprüfen welche Antwort die enableBluetooth Anfrage geliefert hat
@@ -288,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
             {
                 // Wenn Bluetooth eingeschaltet wurde, soll der ConnectButton nicht mehr ausgegraut bleiben und alle gekoppelten
                 // Geräte sollen aufgelistet werden
-                generateListWithPairedDevices();
+                generateListWithPairedDevices(); // TODO wird das noch gebraucht?
 
 
             }
@@ -372,54 +392,73 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+    //endregion
 
-    public void generateListWithActions()
-    {
-        supportedActions = new ArrayList<String>();
-        supportedActions.add("LED_Control");
-        ArrayAdapter<String> arrayAdapter2 = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,supportedActions);
-        spActionSelectMain.setAdapter(arrayAdapter2);
-        spActionSelectMain.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedAction = supportedActions.get(position);
-            }
+    // region onClickListener
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
-
-    public void OnBtnConnectClicked(View v)
-    {
+    @Override
+    public void onClick(View v) {
         BluetoothAdapter testAdapter = BluetoothAdapter.getDefaultAdapter();
-        if(testAdapter.isEnabled()) {
-            changeToSelctedActionActivity();
-        }
-        else
+        switch(v.getId())
         {
-            Toast.makeText(this, "Bitte Bluetooth einschalten", Toast.LENGTH_SHORT).show();
+            case R.id.btnConnectMain:
+                //region Code
+                if(testAdapter.isEnabled()) {
+                    changeToSelctedActionActivity();
+                }
+                else
+                {
+                    Toast.makeText(this, "Bitte Bluetooth einschalten", Toast.LENGTH_SHORT).show();
+                }
+                // endregion
+                break;
+            case R.id.btnFindDevicesMain:
+                //region Code
+                if(btAdapter != null)
+                {
+                    btAdapter.cancelDiscovery();
+                }
+
+                if(testAdapter.isEnabled())
+                {
+
+                    askForBluetoothPermission();
+                    clearListWithNewDeviceNames();
+                    newDevicesObject.clear();
+                }
+                else
+                {
+                    Toast.makeText(this, "Bitte Bluetooth einschalten", Toast.LENGTH_SHORT).show();
+                }
+                //endregion
+                break;
+            case R.id.btnConnectToNewDeviceMain:
+                //region Code
+                if(testAdapter.isEnabled())
+                {int pos = spDiscoveredDevicesMain.getSelectedItemPosition();
+                    if(!pairedDevicesMap.containsKey(newDevicesObject.get(pos).getName())) {
+                        mmDevice = newDevicesObject.get(pos);
+                        if(btAdapter != null)
+                        {
+                            btAdapter.cancelDiscovery();
+                        }
+                        changeToSelctedActionActivity();
+                    }
+                    else
+                    {
+                        Toast.makeText(this, "Dieses Gerät wurde bereits der Liste von gekoppelten Geräten hinzugefügt", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else
+                {
+                    Toast.makeText(this, "Bitte Bluetooth einschalten", Toast.LENGTH_SHORT).show();
+                }
+                //endregion
+                break;
         }
     }
 
-    public void OnBtnFindDevicesClicked(View v)
-    {
-        BluetoothAdapter testAdapter = BluetoothAdapter.getDefaultAdapter();
-        if(testAdapter.isEnabled())
-        {
-            askForBluetoothPermission();
-            newDevicesName.clear();
-            newDevicesObject.clear();
-            btnConnectToNewDeviceMain.setEnabled(false);
-        }
-        else
-        {
-            Toast.makeText(this, "Bitte Bluetooth einschalten", Toast.LENGTH_SHORT).show();
-        }
-
-    }
+    //endregion
 
     //region Implementierung des Broadcast Receivers
     // Create a BroadcastReceiver for ACTION_FOUND.
@@ -462,7 +501,7 @@ public class MainActivity extends AppCompatActivity {
     };
     // endregion
 
-    // TODO Fall PermissionNotGaranted muss in der Activity abgefangen werdne
+    //region Permission und Geräte Suchen
     public void askForBluetoothPermission()
     {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
@@ -479,37 +518,29 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void onBtnConnectToNewDeviceClicked(View v)
-    {
-        BluetoothAdapter testAdapter = BluetoothAdapter.getDefaultAdapter();
-        if(testAdapter.isEnabled())
-        {int pos = spDiscoveredDevicesMain.getSelectedItemPosition();
-            if(!pairedDevicesMap.containsKey(newDevicesObject.get(pos).getName())) {
-                mmDevice = newDevicesObject.get(pos);
-                if(btAdapter != null)
-                {
-                    btAdapter.cancelDiscovery();
-                }
-                changeToSelctedActionActivity();
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-
-
-            }
-            else
-            {
-                Toast.makeText(this, "Dieses Gerät wurde bereits der Liste von gekoppelten Geräten hinzugefügt", Toast.LENGTH_SHORT).show();
-            }
-
-        }
-        else
+        switch(requestCode)
         {
-            Toast.makeText(this, "Bitte Bluetooth einschalten", Toast.LENGTH_SHORT).show();
+            case MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // BluetoothPermission erhalten
+                    btAdapter = BluetoothAdapter.getDefaultAdapter();
+                    btAdapter.startDiscovery();
+                } else {
+                    // Bluetoothpermissio nicht erhalten
+
+                }
+
+
+            break;
         }
-
-
-
     }
+    // endregion
 
+    //region Helper Methoden für Listen und Sets
     // Weil ArrayLists nicht als Prefs gespeichert werden können, wird hier ein Set daraus gemacht
     public Set<String> castListToSet(ArrayList<String> list)
     {
@@ -530,7 +561,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return castedSet;
     }
-
+    // endregion
 
 
 
