@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 public class MainActivity extends AppCompatActivity {
 
 
@@ -65,19 +66,21 @@ public class MainActivity extends AppCompatActivity {
 
 
     BluetoothAdapter btAdapter;
+    PairedDevices pairedDevices;
 
     int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
     int REQUEST_ENABLE_BT = 2; // erhält Result Code
     static final int FilteredPairedDevicesListRequest = 4;
-    OutputStream mmOutputStream = null;
-    InputStream mmInputStream = null;
-    BluetoothSocket mmSocket = null;
     // endregion
 
+
+
+    // region Lifecycle Methoden
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setTitle("Bluetooth Geräte Steuern");
         // region Initialisierung aller Widgets
         spDeviceListMain = (Spinner) findViewById(R.id.spDeviceListMain);
         spActionSelectMain = (Spinner) findViewById(R.id.spActionSelectMain);
@@ -90,11 +93,13 @@ public class MainActivity extends AppCompatActivity {
         btnConnectMain = (Button) findViewById(R.id.btnConnectMain);
         btnFindDevicesMain = (Button) findViewById(R.id.btnFindDevicesMain);
         btnConnectToNewDeviceMain = (Button) findViewById(R.id.btnConnectToNewDeviceMain);
-        setTitle("Bluetooth Geräte Steuern");
         pbSearchInProgress = (ProgressBar) findViewById(R.id.pbSearchInProgress);
-        pbSearchInProgress.setVisibility(View.INVISIBLE);
         // endregion
+        //region Einstellungen für Widgets
+        pbSearchInProgress.setVisibility(View.INVISIBLE);
         btnConnectMain.setEnabled(false);
+        btnConnectToNewDeviceMain.setEnabled(false);
+        // endregion
         checkForBluetooth();
         //region Registrierung eines BroadcastReceivers um neue Geräte zu finden
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -103,13 +108,13 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(mReceiver,filter);
         //endregion
         //region Listen generieren und füllen
+
         generateListWithNewBluetoothDeviceNames();
         generateListWithNewBluetoothDeviceObjects();
         generateListWithActions();
         generateListWithPairedDevices();
         fillListWithPairedDevices();
         //endregion
-        btnConnectToNewDeviceMain.setEnabled(false);
 
     }
 
@@ -119,6 +124,23 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(mReceiver);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        generateListWithPairedDevices();
+        fillListWithPairedDevices();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        clearListWithNewDeviceNames();
+
+    }
+    // endregion
+
+    //region Menue
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -142,21 +164,10 @@ public class MainActivity extends AppCompatActivity {
 
         return true;
     }
+    // endregion
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        generateListWithPairedDevices();
-        fillListWithPairedDevices();
 
-    }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        clearListWithNewDeviceNames();
-
-    }
 
     public void generateListWithNewBluetoothDeviceNames()
     {
@@ -180,6 +191,7 @@ public class MainActivity extends AppCompatActivity {
         newDevicesObject = new ArrayList<BluetoothDevice>();
     }
 
+    // TODO Kann gelöscht werden
     public void generateListWithPairedDevices()
     {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -216,6 +228,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // TODO Muss die Methoden der Klasse PairedDevices verwenden
     public void fillListWithPairedDevices()
     {
         BluetoothAdapter testAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -239,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
+    // TODO Kann gelöscht werden, wenn startActivityForResult abgefangen wird
     public void checkForBluetooth()
     {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -449,6 +462,7 @@ public class MainActivity extends AppCompatActivity {
     };
     // endregion
 
+    // TODO Fall PermissionNotGaranted muss in der Activity abgefangen werdne
     public void askForBluetoothPermission()
     {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
