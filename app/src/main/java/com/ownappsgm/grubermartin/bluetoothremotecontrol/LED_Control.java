@@ -5,7 +5,9 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -35,6 +37,10 @@ public class LED_Control extends AppCompatActivity {
     InputStream mmInputStream;
     ImageView ivIndicatingLedState;
 
+    char onComand;
+    char offCommand;
+    final String PrefBtnCommandOnKey = "btnCommandOnKey";
+    final String PrefBtnCommandOffKey = "btnCommandOffKey";
     Boolean deviceNeedsPassword;
 
     @Override
@@ -46,6 +52,9 @@ public class LED_Control extends AppCompatActivity {
         btnLedOffLedControl = (Button) findViewById(R.id.btnLedOffLedControl);
         ivIndicatingLedState = (ImageView) findViewById(R.id.ivIndicatingLedState);
         ivIndicatingLedState.setImageResource(R.drawable.greenledoff);
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        onComand = prefs.getString(PrefBtnCommandOnKey,"e").charAt(0);
+        offCommand = prefs.getString(PrefBtnCommandOffKey,"a").charAt(0);
         Intent recieveDevice = getIntent();
 
         mmDevice = recieveDevice.getExtras().getParcelable("bluetoothDevice");
@@ -88,7 +97,7 @@ public class LED_Control extends AppCompatActivity {
     public void OnBtnLedOnClicked(View v)
     {
         try {
-            sendData('e');
+            sendData(onComand);
             ivIndicatingLedState.setImageResource(R.drawable.greenledon);
         } catch (IOException e) {
             e.printStackTrace();
@@ -100,7 +109,7 @@ public class LED_Control extends AppCompatActivity {
     public void OnBtnLedOffClicked(View v)
     {
         try {
-            sendData('a');
+            sendData(offCommand);
             ivIndicatingLedState.setImageResource(R.drawable.greenledoff);
 
         } catch (IOException e) {

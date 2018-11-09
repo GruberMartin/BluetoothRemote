@@ -128,12 +128,9 @@ public class LED_Control_Settings extends AppCompatActivity implements View.OnCl
         boolean handled = false;
 
         if (actionId == EditorInfo.IME_ACTION_NEXT) {
-            /*etLedOnCommand.setCursorVisible(false);
-            etLedOnCommand.setFocusable(true);
-            etLedOffCommand.setCursorVisible(true);
-            etLedOffCommand.setFocusable(true);*/
             etLedOffCommand.requestFocus();
-
+            etLedOffCommand.setCursorVisible(true);
+            etLedOffCommand.setSelection(etLedOffCommand.getText().length());
 
             handled = true;
         }
