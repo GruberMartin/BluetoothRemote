@@ -256,6 +256,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     {
         supportedActions = new ArrayList<String>();
         supportedActions.add("LED_Control");
+        supportedActions.add("Terminal");
         ArrayAdapter<String> arrayAdapter2 = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,supportedActions);
         spActionSelectMain.setAdapter(arrayAdapter2);
         spActionSelectMain.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -383,6 +384,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String deliveringDevice = mmDevice.getName();
                 startActivity(changeToActionActivity);
             break;
+            case "Terminal":
+                Intent changeToActionActivity2 = new Intent(this,Terminal.class);
+                changeToActionActivity2.putExtra("bluetoothDevice",mmDevice);
+                String deliveringDevice2 = mmDevice.getName();
+                startActivity(changeToActionActivity2);
+                break;
             case "Fehler":
                 Toast.makeText(this, "Es kann kein Gerät übergeben werden", Toast.LENGTH_LONG).show();
                 break;

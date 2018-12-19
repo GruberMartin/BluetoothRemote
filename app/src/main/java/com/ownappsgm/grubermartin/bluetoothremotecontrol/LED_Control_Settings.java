@@ -21,7 +21,7 @@ import android.widget.Toast;
 public class LED_Control_Settings extends AppCompatActivity implements View.OnClickListener, TextView.OnEditorActionListener, View.OnTouchListener {
 
     TextView tvUserHintLedSettings;
-    Button btnLedOnSetting, btnLedOffSetting, btnSaveLedSettings;
+    Button btnLedOnSetting, btnLedOffSetting, btnSaveLedSettings, btnReset;
     EditText etLedOnCommand, etLedOffCommand;
     ConstraintLayout led_control_constraint_layout;
 
@@ -41,6 +41,7 @@ public class LED_Control_Settings extends AppCompatActivity implements View.OnCl
         btnLedOnSetting = (Button) findViewById(R.id.btnLedOnSetting);
         btnLedOffSetting = (Button) findViewById(R.id.btnLedOffSetting);
         btnSaveLedSettings = (Button) findViewById(R.id.btnSaveLedSettings);
+        btnReset = (Button) findViewById(R.id.btnReset);
         etLedOnCommand = (EditText) findViewById(R.id.etLedOnCommand);
         etLedOffCommand = (EditText) findViewById(R.id.etLedOffCommand);
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -53,6 +54,7 @@ public class LED_Control_Settings extends AppCompatActivity implements View.OnCl
         etLedOffCommand.setOnTouchListener(this);
         etLedOnCommand.setOnClickListener(this);
         btnSaveLedSettings.setOnClickListener(this);
+        btnReset.setOnClickListener(this);
         etLedOnCommand.setCursorVisible(false);
         etLedOffCommand.setCursorVisible(false);
         etLedOffCommand.setFocusableInTouchMode(true);
@@ -62,6 +64,11 @@ public class LED_Control_Settings extends AppCompatActivity implements View.OnCl
         savedBTdevice = getIntent().getExtras().getParcelable("saveCurrentDevice");
     }
 
+
+    public void performSave()
+    {
+
+    }
 
 
     @Override
@@ -97,13 +104,11 @@ public class LED_Control_Settings extends AppCompatActivity implements View.OnCl
         switch(v.getId())
         {
             case R.id.etLedOffCommand:
-//                etLedOffCommand.setCursorVisible(true);
                 etLedOffCommand.requestFocus();
                 etLedOffCommand.setCursorVisible(true);
                 etLedOffCommand.setSelection(etLedOffCommand.getText().length());
                 break;
             case R.id.etLedOnCommand:
-//                etLedOnCommand.setCursorVisible(true);
                 etLedOnCommand.requestFocus();
                 etLedOnCommand.setCursorVisible(true);
                 etLedOnCommand.setSelection(etLedOnCommand.getText().length());
@@ -120,6 +125,10 @@ public class LED_Control_Settings extends AppCompatActivity implements View.OnCl
                 startActivity(goToLEDControl);
                 finish();
                 break;
+            case R.id.btnReset:
+                etLedOnCommand.setText("e");
+                etLedOffCommand.setText("a");
+                break;
         }
     }
 
@@ -131,20 +140,12 @@ public class LED_Control_Settings extends AppCompatActivity implements View.OnCl
             etLedOffCommand.requestFocus();
             etLedOffCommand.setCursorVisible(true);
             etLedOffCommand.setSelection(etLedOffCommand.getText().length());
-
             handled = true;
         }
 
         if(actionId == EditorInfo.IME_ACTION_DONE)
         {
-            /*etLedOnCommand.setCursorVisible(false);
-            etLedOnCommand.setFocusable(false);
-            etLedOffCommand.setCursorVisible(false);
-            etLedOffCommand.setSelected(false);
-            etLedOffCommand.setFocusable(false);*/
             performClick(btnSaveLedSettings);
-
-
             handled = true;
         }
         return handled;
